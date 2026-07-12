@@ -1,5 +1,5 @@
 {
-  "name": "skillsmith",
+  "name": "@rodriuy/skillsmith",
   "version": "0.1.0",
   "description": "Scaffold, lint, and audit Claude Code / Agent Skills. Zero runtime dependencies.",
   "keywords": [
@@ -24,6 +24,9 @@
   ],
   "engines": {
     "node": ">=18"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "scripts": {
     "build": "tsc",

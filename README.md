@@ -5,7 +5,7 @@
 A skill lives or dies by its `description`. It's the only thing the model reads to decide *when* to load it. skillsmith checks that description (and everything else about a `SKILL.md`) so your skills actually fire when they should, and catches the boring mistakes before they ship.
 
 ```bash
-npx skillsmith lint ~/.claude/skills
+npx @rodriuy/skillsmith lint ~/.claude/skills
 ```
 
 ```
@@ -36,14 +36,16 @@ None of these throw an error. They just make your skill silently useless. skills
 Use it without installing.
 
 ```bash
-npx skillsmith lint .
+npx @rodriuy/skillsmith lint .
 ```
 
 Or add it to a project.
 
 ```bash
-npm install --save-dev skillsmith
+npm install --save-dev @rodriuy/skillsmith
 ```
+
+Installed globally (`npm i -g @rodriuy/skillsmith`), the command is just `skillsmith`. The examples below use that short form.
 
 ## Commands
 
@@ -109,7 +111,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: { node-version: 22 }
-      - run: npx skillsmith lint .claude/skills --strict
+      - run: npx @rodriuy/skillsmith lint .claude/skills --strict
 ```
 
 ## Design notes
