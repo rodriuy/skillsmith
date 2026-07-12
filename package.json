@@ -1,0 +1,48 @@
+{
+  "name": "skillsmith",
+  "version": "0.1.0",
+  "description": "Scaffold, lint, and audit Claude Code / Agent Skills. Zero runtime dependencies.",
+  "keywords": [
+    "claude",
+    "claude-code",
+    "agent-skills",
+    "skills",
+    "linter",
+    "mcp",
+    "ai",
+    "cli",
+    "scaffold"
+  ],
+  "type": "module",
+  "bin": {
+    "skillsmith": "dist/src/cli.js"
+  },
+  "files": [
+    "dist/src",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "build": "tsc",
+    "prepublishOnly": "npm run build",
+    "test": "npm run build && node --test dist/test/*.test.js",
+    "lint:self": "node dist/src/cli.js lint examples"
+  },
+  "license": "MIT",
+  "author": "rodriuy",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rodriuy/skillsmith.git"
+  },
+  "homepage": "https://github.com/rodriuy/skillsmith#readme",
+  "bugs": {
+    "url": "https://github.com/rodriuy/skillsmith/issues"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.0",
+    "@types/node": "^22.0.0"
+  }
+}
