@@ -1,8 +1,18 @@
 # skillsmith
 
-> Scaffold, lint, and audit [Claude Code](https://docs.claude.com/en/docs/claude-code) / Agent **Skills**, with zero runtime dependencies.
+**Creá, revisá y auditá skills de Claude Code / Agent, sin una sola dependencia.** 🔨
 
-A skill lives or dies by its `description`. It's the only thing the model reads to decide *when* to load it. skillsmith checks that description (and everything else about a `SKILL.md`) so your skills actually fire when they should, and catches the boring mistakes before they ship.
+**Español** · [English](#english)
+
+[![CI](https://github.com/rodriuy/skillsmith/actions/workflows/ci.yml/badge.svg)](https://github.com/rodriuy/skillsmith/actions/workflows/ci.yml) ![license](https://img.shields.io/badge/license-MIT-blue)
+
+Una skill vive o muere por su `description`. Es lo único que el modelo lee para decidir *cuándo* cargarla. Si está mal escrita, la skill queda ahí, muda, ocupando lugar, y nadie te avisa. skillsmith te marca eso, y todo lo demás que puede estar mal en un `SKILL.md`, antes de que se te escape.
+
+### 🤔 Por qué lo hice
+
+Tenía un montón de skills instaladas y un día caí en que no tenía forma de saber cuáles estaban rotas, o por qué algunas nunca se activaban. Le pasé la herramienta a mi propia carpeta y encontró cuatro con el frontmatter mal armado y hasta un nombre repetido. Ahí dije, bueno, valía la pena.
+
+### 🚀 Probalo
 
 ```bash
 npx @rodriuy/skillsmith lint ~/.claude/skills
@@ -20,85 +30,45 @@ ok  good-skill  - clean
 Summary: 2 skills - 1 clean - 5 warnings
 ```
 
-## Why
+### 🧰 Comandos
 
-Skills are easy to write and easy to write *wrong*. The failure modes are quiet.
-
-- A `description` that says *what* the skill does but never *when* to use it, so the model never loads it.
-- A `name` that doesn't match its folder, or isn't kebab-case.
-- A `SKILL.md` that links to `references/foo.md`, which you renamed three commits ago.
-- Two skills that quietly share a name.
-
-None of these throw an error. They just make your skill silently useless. skillsmith turns them into findings you can see, and fail CI on.
-
-## Install
-
-Use it without installing.
+**`skillsmith lint [rutas...]`** revisa cada skill que encuentre bajo las rutas que le pases (por defecto, la carpeta actual). Una "skill" es cualquier carpeta con un `SKILL.md` adentro.
 
 ```bash
-npx @rodriuy/skillsmith lint .
+skillsmith lint ~/.claude/skills      # auditá toda tu biblioteca
+skillsmith lint ./mi-skill            # una sola
+skillsmith lint . --strict            # los warnings también fallan (para CI)
+skillsmith lint . --json              # salida para máquinas
+skillsmith lint . --quiet             # mostrá solo las que tienen algo
 ```
 
-Or add it to a project.
+Códigos de salida. `0` limpio, `1` hallazgos (errores, o warnings con `--strict`), `2` error de uso.
 
-```bash
-npm install --save-dev @rodriuy/skillsmith
-```
+**`skillsmith new <nombre>`** te arma una skill nueva con un template que ya trae la `description` escrita como se debe, con los triggers adelante.
 
-Installed globally (`npm i -g @rodriuy/skillsmith`), the command is just `skillsmith`. The examples below use that short form.
+**`skillsmith list [rutas...]`** te lista las skills que encuentra con su descripción, un índice rápido de tu biblioteca.
 
-## Commands
+Si lo instalás global (`npm i -g @rodriuy/skillsmith`), el comando queda como `skillsmith` a secas.
 
-### `skillsmith lint [paths...]`
+### 📋 Las reglas
 
-Validate every skill found under the given paths (defaults to the current directory). A "skill" is any directory containing a `SKILL.md`.
-
-```bash
-skillsmith lint ~/.claude/skills      # audit your whole skill library
-skillsmith lint ./my-skill            # a single skill
-skillsmith lint . --strict            # treat warnings as failures (CI)
-skillsmith lint . --json              # machine-readable output
-skillsmith lint . --quiet             # only show skills with findings
-```
-
-Exit codes. `0` clean, `1` findings (errors, or warnings with `--strict`), `2` usage error.
-
-### `skillsmith new <name>`
-
-Scaffold a new skill with a strong starting template, including a `description` written the way descriptions should be written (triggers first).
-
-```bash
-skillsmith new pdf-export
-skillsmith new pdf-export --dir ~/.claude/skills
-```
-
-### `skillsmith list [paths...]`
-
-List discovered skills and their descriptions, a quick index of a skill library.
-
-```bash
-skillsmith list ~/.claude/skills
-```
-
-## The rules
-
-| Rule | Severity | What it catches |
+| Regla | Nivel | Qué agarra |
 |---|---|---|
-| `frontmatter-present` | error | Missing or unclosed `---` frontmatter block |
-| `name-present` | error | No `name` in frontmatter |
-| `description-present` | error | No `description`, so the model can't decide when to load the skill |
-| `name-unique` | error | Two discovered skills share a `name` |
-| `name-kebab-case` | warn | `name` isn't lowercase-kebab-case |
-| `name-matches-dir` | warn | `name` differs from its directory |
-| `name-length` | warn | `name` over 64 chars |
-| `description-too-short` | warn | Description too vague to reliably trigger |
-| `description-triggers` | warn | Description describes *what*, not *when* |
-| `broken-reference` | warn | A linked local file (like `references/foo.md`) doesn't exist |
-| `description-too-long` | info | Description is heavy on context, trim filler |
-| `body-nonempty` | warn | The `SKILL.md` body is effectively empty |
-| `body-heading` | info | No Markdown heading in the body |
+| `frontmatter-present` | error | Falta el bloque `---` o quedó sin cerrar |
+| `name-present` | error | No hay `name` en el frontmatter |
+| `description-present` | error | No hay `description`, el modelo no puede decidir cuándo cargarla |
+| `name-unique` | error | Dos skills comparten el mismo `name` |
+| `name-kebab-case` | warn | El `name` no está en minúscula-kebab-case |
+| `name-matches-dir` | warn | El `name` no coincide con su carpeta |
+| `name-length` | warn | `name` de más de 64 caracteres |
+| `description-too-short` | warn | Descripción muy vaga para disparar tranquila |
+| `description-triggers` | warn | La descripción dice *qué* hace, no *cuándo* usarla |
+| `broken-reference` | warn | Un archivo local linkeado (como `references/foo.md`) no existe |
+| `description-too-long` | info | Descripción pesada de contexto, recortá relleno |
+| `body-nonempty` | warn | El cuerpo del `SKILL.md` está prácticamente vacío |
+| `body-heading` | info | El cuerpo no tiene ningún título Markdown |
 
-## Use it in CI
+### ⚙️ En CI
 
 ```yaml
 # .github/workflows/skills.yml
@@ -114,15 +84,9 @@ jobs:
       - run: npx @rodriuy/skillsmith lint .claude/skills --strict
 ```
 
-## Design notes
+### 🤝 Contribuir
 
-- **No runtime dependencies.** The frontmatter parser is a small, tested module that handles the YAML subset skills actually use (quoted strings, folded `>` and literal `|` block scalars, nested mappings). Nothing to audit, nothing to install.
-- **Every rule maps to a real failure.** Info-level findings are suggestions, warnings are worth fixing, and errors mean the skill won't work. No style nags.
-- **Meant for CI.** `--strict` and `--json` are there so you can gate merges on skill quality.
-
-## Contributing
-
-Issues and PRs welcome. New lint rules should map to a real, observable failure mode, so add a fixture under `examples/` and a test.
+Los issues y PRs son bienvenidos. Cada regla nueva tendría que mapear a una forma real y observable de que una skill se rompe, así que sumá un fixture en `examples/` y un test.
 
 ```bash
 npm install
@@ -130,6 +94,78 @@ npm run build
 npm test
 ```
 
-## License
+Cero dependencias en runtime. El parser de frontmatter es un módulo chico y testeado que banca el subconjunto de YAML que las skills usan de verdad. Nada que auditar, nada que instalar.
 
-MIT
+Hecho en Uruguay 🇺🇾 por [rodriuy](https://github.com/rodriuy). MIT.
+
+---
+
+## English
+
+[Español](#skillsmith) · **English**
+
+**Scaffold, lint and audit Claude Code / Agent Skills, with zero runtime dependencies.** 🔨
+
+A skill lives or dies by its `description`. It's the only thing the model reads to decide *when* to load it. If it's written badly the skill just sits there, mute, taking up space, and nothing warns you. skillsmith flags that, and everything else that can be wrong in a `SKILL.md`, before it ships.
+
+### 🤔 Why I built it
+
+I had a pile of skills installed and one day it hit me that I had no way to know which ones were broken, or why some never fired. I ran this against my own folder and it found four with busted frontmatter and even a duplicate name. That settled it, worth doing.
+
+### 🚀 Try it
+
+```bash
+npx @rodriuy/skillsmith lint ~/.claude/skills
+```
+
+### 🧰 Commands
+
+**`skillsmith lint [paths...]`** checks every skill found under the given paths (defaults to the current directory). A "skill" is any directory with a `SKILL.md` in it.
+
+```bash
+skillsmith lint ~/.claude/skills      # audit your whole library
+skillsmith lint ./my-skill            # a single one
+skillsmith lint . --strict            # warnings fail too (for CI)
+skillsmith lint . --json              # machine-readable output
+skillsmith lint . --quiet             # only show skills with findings
+```
+
+Exit codes. `0` clean, `1` findings (errors, or warnings with `--strict`), `2` usage error.
+
+**`skillsmith new <name>`** scaffolds a new skill from a template that already writes the `description` the right way, triggers first.
+
+**`skillsmith list [paths...]`** lists the skills it finds with their description, a quick index of your library.
+
+Installed globally (`npm i -g @rodriuy/skillsmith`), the command is just `skillsmith`.
+
+### 📋 The rules
+
+| Rule | Level | What it catches |
+|---|---|---|
+| `frontmatter-present` | error | Missing or unclosed `---` frontmatter block |
+| `name-present` | error | No `name` in the frontmatter |
+| `description-present` | error | No `description`, so the model can't decide when to load it |
+| `name-unique` | error | Two skills share the same `name` |
+| `name-kebab-case` | warn | `name` isn't lowercase-kebab-case |
+| `name-matches-dir` | warn | `name` differs from its directory |
+| `name-length` | warn | `name` over 64 chars |
+| `description-too-short` | warn | Description too vague to trigger reliably |
+| `description-triggers` | warn | Description says *what* it does, not *when* to use it |
+| `broken-reference` | warn | A linked local file (like `references/foo.md`) doesn't exist |
+| `description-too-long` | info | Description is heavy on context, trim filler |
+| `body-nonempty` | warn | The `SKILL.md` body is basically empty |
+| `body-heading` | info | No Markdown heading in the body |
+
+### 🤝 Contributing
+
+Issues and PRs welcome. A new rule should map to a real, observable way a skill breaks, so add a fixture under `examples/` and a test.
+
+```bash
+npm install
+npm run build
+npm test
+```
+
+Zero runtime dependencies. The frontmatter parser is a small, tested module that handles the YAML subset skills actually use. Nothing to audit, nothing to install.
+
+Made in Uruguay 🇺🇾 by [rodriuy](https://github.com/rodriuy). MIT.
